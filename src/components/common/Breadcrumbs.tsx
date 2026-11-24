@@ -1,0 +1,74 @@
+import React from "react";
+import Link from "next/link";
+import { ChevronRight, Home } from "lucide-react";
+
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface BreadcrumbsProps {
+  items: BreadcrumbItem[];
+}
+
+export function Breadcrumbs({ items }: BreadcrumbsProps) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://solveatlas.com",
+      },
+      ...items.map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 2,
+        name: item.label,
+        ...(item.href ? { item: `https://solveatlas.com${item.href}` } : {}),
+      })),
+    ],
+  };
+
+  return (
+    <nav aria-label="Breadcrumb" className="w-full mb-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ol className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+        <li>
+          <Link
+            href="/"
+            className="flex items-center gap-1 text-slate-500 hover:text-navy-950 transition-colors"
+          >
+            <Home className="w-3.5 h-3.5" />
+            <span className="sr-only">Home</span>
+          </Link>
+        </li>
+
+        {items.map((item, index) => {
+          const isLast = index === items.length - 1;
+          return (
+            <li key={index} className="flex items-center gap-1.5">
+              <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              {item.href && !isLast ? (
+                <Link
+                  href={item.href}
+                  className="text-slate-500 hover:text-navy-950 transition-colors font-medium truncate max-w-[180px] sm:max-w-none"
+                >
+                  {item.label}
+                </Link>
+              ) : (
+                <span className="text-slate-900 font-semibold truncate max-w-[220px] sm:max-w-md">
+                  {item.label}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
